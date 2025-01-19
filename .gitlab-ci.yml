@@ -2,6 +2,6 @@ include:
   - template: Auto-DevOps.gitlab-ci.yml
 
 variables:
-  SAST_EXCLUDED_PATHS: "frontend/src/assets/private/**"
+  SAST_EXCLUDED_PATHS: "frontend/src/assets/private/**/"
   TEST_DISABLED: "true"
   DAST_DISABLED: "true"
