@@ -1,15 +1,11 @@
 on:
   workflow_dispatch: {}
-  pull_request: {}
   push:
     branches:
-    - main
-    - master
+      - main  # Trigger on commits to the main branch
     paths:
-    - .github/workflows/semgrep.yml
-#  schedule:
-  # random HH:MM to avoid a load spike on GitHub Actions at 00:00
-#  - cron: 10 14 * * *
+      - .github/workflows/semgrep.yml  # Optional: specify paths to limit trigger to changes in this file
+
 name: Semgrep
 jobs:
   semgrep:
@@ -20,5 +16,5 @@ jobs:
     container:
       image: returntocorp/semgrep
     steps:
-    - uses: actions/checkout@v4
-    - run: semgrep ci
+      - uses: actions/checkout@v4
+      - run: semgrep ci
