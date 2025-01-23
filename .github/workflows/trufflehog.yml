@@ -1,3 +1,4 @@
+name: TruffleHog Scan
 on:
   push:
     branches:
