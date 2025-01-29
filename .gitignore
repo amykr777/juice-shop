@@ -45,6 +45,7 @@ out/
 # Branch ghpages
 assets/
 !frontend/src/assets/
+asset/
 
 # Custom configuration files
 config/*.yml
