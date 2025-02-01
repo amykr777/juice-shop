@@ -119,6 +119,7 @@ jobs:
   commit-results:
     name: Commit Reports
     needs: [sca-scan, sast-scan, sbom-generation]
+    if: always()  # Force this job to run regardless of the outcome of dependencies
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
