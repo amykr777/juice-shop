@@ -76,4 +76,4 @@ jobs:
         run: pip install semgrep  # Install Semgrep natively
 
       - name: Run Semgrep
-        run: semgrep ci --config=auto
+        run: semgrep ci
