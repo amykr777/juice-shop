@@ -55,7 +55,7 @@ jobs:
         run: snyk test --json-file-output=snyk.json
 
       - name: Upload Snyk Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: snyk-report
           path: snyk.json
@@ -85,7 +85,7 @@ jobs:
         run: semgrep ci --json-output=semgrep.json
 
       - name: Upload Semgrep Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: semgrep-report
           path: semgrep.json
@@ -110,7 +110,7 @@ jobs:
         run: cdxgen -o bom.json
 
       - name: Upload SBOM Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sbom-report
           path: bom.json
@@ -130,19 +130,19 @@ jobs:
         run: mkdir -p output
 
       - name: Download Snyk Report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: snyk-report
           path: ./output
 
       - name: Download Semgrep Report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: semgrep-report
           path: ./output
 
       - name: Download SBOM Report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: sbom-report
           path: ./output
