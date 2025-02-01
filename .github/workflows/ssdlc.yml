@@ -57,22 +57,13 @@ jobs:
   # 3. Static Application Security Testing (SAST)
   sast-scan:
     name: SAST Scanning (Semgrep)
-    runs-on: ubuntu-20.04
-    env:
-      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-    container:
-      image: returntocorp/semgrep
+    runs-on: ubuntu-latest  # Use a normal Ubuntu runner instead of a container
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Install dependencies
-        run: npm install
+      - name: Install Semgrep
+        run: pip install semgrep  # Install Semgrep natively
 
       - name: Run Semgrep
-        run: semgrep ci
+        run: semgrep ci --config=auto
