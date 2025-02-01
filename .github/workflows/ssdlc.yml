@@ -46,20 +46,26 @@ jobs:
         run: npm install
 
       - name: Install Snyk CLI
-        run: npm install -g snyk  # Ensure Snyk is installed
+        run: npm install -g snyk
 
       - name: Authenticate Snyk CLI
         run: snyk auth ${{ secrets.SNYK_TOKEN }}
 
       - name: Run Snyk DAST Scan
-        run: snyk test --json-file-output=report.json
+        run: snyk test --json-file-output=snyk.json
+
+      - name: Upload Snyk Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: snyk-report
+          path: snyk.json
 
   # 3. Static Application Security Testing (SAST)
   sast-scan:
     name: SAST Scanning (Semgrep)
     runs-on: ubuntu-latest
     env:
-      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}  # Added token for authentication
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -73,11 +79,17 @@ jobs:
         run: npm install
 
       - name: Install Semgrep
-        run: pip install semgrep  # Install Semgrep natively
+        run: pip install semgrep
 
       - name: Run Semgrep
-        run: semgrep ci
-        
+        run: semgrep ci --json-output=semgrep.json
+
+      - name: Upload Semgrep Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-report
+          path: semgrep.json
+
   # 4. Generate SBOM
   sbom-generation:
     name: SBOM Generation
@@ -89,7 +101,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20.18.0'  # Specify the Node.js version
+          node-version: '20.18.0'
 
       - name: Install cdxgen
         run: npm install -g @appthreat/cdxgen
@@ -97,3 +109,53 @@ jobs:
       - name: Generate SBOM
         run: cdxgen -o bom.json
 
+      - name: Upload SBOM Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: sbom-report
+          path: bom.json
+
+  # 5. Commit and Push Reports
+  commit-results:
+    name: Commit Reports
+    needs: [sca-scan, sast-scan, sbom-generation]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create output folder
+        run: mkdir -p output
+
+      - name: Download Snyk Report
+        uses: actions/download-artifact@v3
+        with:
+          name: snyk-report
+          path: ./output
+
+      - name: Download Semgrep Report
+        uses: actions/download-artifact@v3
+        with:
+          name: semgrep-report
+          path: ./output
+
+      - name: Download SBOM Report
+        uses: actions/download-artifact@v3
+        with:
+          name: sbom-report
+          path: ./output
+
+      - name: Commit Reports to Repository
+        run: |
+          git config --local user.email "amykr930@gmail.com"
+          git config --global user.name "amykr777"
+          git add output/snyk.json output/semgrep.json output/bom.json
+          git commit -m "SSDL report update" --allow-empty
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
