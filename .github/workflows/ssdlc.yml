@@ -77,3 +77,16 @@ jobs:
 
       - name: Run Semgrep
         run: semgrep ci
+        
+  # 4. Generate SBOM
+  sbom-generation:
+    name: SBOM Generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Generate SBOM
+        uses: CycloneDX/cdxgen-action@v1
+        with:
+          output: "bom.json"
