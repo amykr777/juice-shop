@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # 1. Pre-Commit & Secret Detection
+  # 1. Secret Detection
   secrets-scan:
     name: Secret Scanning
     runs-on: ubuntu-latest
@@ -31,49 +31,7 @@ jobs:
 
   # 2. Software Composition Analysis (SCA)
   sca-scan:
-    name: SCA Scanning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: OpenSCA Scan
-        uses: XmirrorSecurity/opensca-scan-action@v1
-        with:
-          token: ${{ secrets.OPENSCA_TOKEN }}
-          out: "outputs/result.json,outputs/result.html"
-          need-artifact: "true"
-
-      - name: Install Snyk CLI
-        run: |
-          curl --compressed https://downloads.snyk.io/cli/stable/snyk-linux -o snyk
-          chmod +x ./snyk
-          sudo mv ./snyk /usr/local/bin/
-
-      - name: Authenticate Snyk CLI
-        run: snyk auth ${{ secrets.SNYK_TOKEN }}
-
-      - name: Run Snyk SCA Test
-        run: snyk test --json-file-output=report.json
-
-  # 3. Static Application Security Testing (SAST)
-  sast-scan:
-    name: SAST Scanning
-    runs-on: ubuntu-20.04
-    env:
-      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
-    container:
-      image: returntocorp/semgrep
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Semgrep
-        run: semgrep ci
-
-  # 4. Security Testing in CI/CD
-  ci-security:
-    name: CI/CD Security Scanning
+    name: Snyk Scanning
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -87,5 +45,29 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install Snyk CLI
+        run: npm install -g snyk  # Ensure Snyk is installed
+
+      - name: Authenticate Snyk CLI
+        run: snyk auth ${{ secrets.SNYK_TOKEN }}
+
       - name: Run Snyk DAST Scan
         run: snyk test --json-file-output=report.json
+
+  # 3. Static Application Security Testing (SAST)
+  sast-scan:
+    name: SAST Scanning (Semgrep)
+    runs-on: ubuntu-20.04
+    env:
+      SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+    container:
+      image: returntocorp/semgrep
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Semgrep
+        run: semgrep ci
